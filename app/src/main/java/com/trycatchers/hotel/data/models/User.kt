@@ -1,4 +1,8 @@
 package com.trycatchers.hotel.data.models
 
-class User {
-}
+data class User(
+    val userId: String? = null,
+    val email: String,
+    val password: String,
+    val name: String
+)

@@ -6,12 +6,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.trycatchers.hotel.viewmodels.NewBookingViewModel
 
 @Composable
 fun NewBookingScreen() {
-    val roomCatalogViewModel: NewBookingViewModel = viewModel()
+    val roomCatalogViewModel: NewBookingViewModel = hiltViewModel()
 
     NewBookingView()
 }

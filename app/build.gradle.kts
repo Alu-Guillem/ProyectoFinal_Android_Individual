@@ -23,12 +23,17 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/\"")
+            // Para dispositivo físico: "\"http://tu_ip_local:3000/\""
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_BASE_URL", "\"http://tu_servidor_produccion/\"")
         }
     }
     compileOptions {
