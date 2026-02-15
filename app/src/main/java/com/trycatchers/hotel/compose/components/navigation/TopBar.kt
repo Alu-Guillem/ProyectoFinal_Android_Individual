@@ -26,32 +26,32 @@ fun TopBarView(onThemeToggle: (() -> Unit)? = null) {
     val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     TopAppBar(
-            title = { Text(text = "Galactic Heaven", fontWeight = FontWeight.Bold) },
-            colors =
-                    TopAppBarDefaults.topAppBarColors(
-                            containerColor =
-                                    if (isDarkTheme) MaterialTheme.colorScheme.primaryContainer
-                                    else MaterialTheme.colorScheme.surfaceContainerHighest,
-                            titleContentColor =
-                                    if (isDarkTheme) MaterialTheme.colorScheme.onPrimaryContainer
-                                    else MaterialTheme.colorScheme.onSurface
-                    ),
-            actions = {
-                if (onThemeToggle != null) {
-                    IconButton(onClick = onThemeToggle) {
-                        Icon(
-                                imageVector =
-                                        if (isDarkTheme) Icons.Outlined.LightMode
-                                        else Icons.Outlined.DarkMode,
-                                contentDescription = "Cambiar tema",
-                                tint =
-                                        if (isDarkTheme)
-                                                MaterialTheme.colorScheme.onPrimaryContainer
-                                        else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+        title = { Text(text = "Galactic Heaven", fontWeight = FontWeight.Bold) },
+        colors =
+        TopAppBarDefaults.topAppBarColors(
+            containerColor =
+            if (isDarkTheme) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceContainerHighest,
+            titleContentColor =
+            if (isDarkTheme) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface
+        ),
+        actions = {
+            if (onThemeToggle != null) {
+                IconButton(onClick = onThemeToggle) {
+                    Icon(
+                        imageVector =
+                        if (isDarkTheme) Icons.Outlined.LightMode
+                        else Icons.Outlined.DarkMode,
+                        contentDescription = "Cambiar tema",
+                        tint =
+                        if (isDarkTheme)
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
+        }
     )
 }
 

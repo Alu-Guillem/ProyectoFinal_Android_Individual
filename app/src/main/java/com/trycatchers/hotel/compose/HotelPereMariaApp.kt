@@ -13,9 +13,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.trycatchers.hotel.compose.components.navigation.BottomBar
 import com.trycatchers.hotel.compose.components.navigation.TopBar
-import com.trycatchers.hotel.compose.screens.RoomCatalogView
-import com.trycatchers.hotel.compose.screens.RoomFinderView
-import com.trycatchers.hotel.compose.screens.UserAccountView
+import com.trycatchers.hotel.compose.screens.RoomCatalogScreen
+import com.trycatchers.hotel.compose.screens.RoomDetailsScreen
+import com.trycatchers.hotel.compose.screens.RoomFinderScreen
+import com.trycatchers.hotel.compose.screens.UserAccountScreen
 
 @Composable
 fun HotelPereMariaApp(onThemeToggle: () -> Unit) {
@@ -32,33 +33,50 @@ fun HotelPereMariaApp(onThemeToggle: () -> Unit) {
     }
 
     Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = { TopBar(navigateTo = navigateTo, onThemeToggle = onThemeToggle) },
-            bottomBar = { BottomBar(navigateTo = navigateTo, currentRoute = currentRoute) }
+        modifier = Modifier.fillMaxSize(),
+        topBar = { TopBar(navigateTo = navigateTo, onThemeToggle = onThemeToggle) },
+        bottomBar = { BottomBar(navigateTo = navigateTo, currentRoute = currentRoute) }
     ) { innerPadding ->
         HotelPereMariaNavHost(
-                navController = navController,
-                modifier = Modifier.padding(innerPadding),
-                navigateTo = navigateTo
+            navController = navController,
+            modifier = Modifier.padding(innerPadding),
+            navigateTo = navigateTo
         )
     }
 }
 
 @Composable
 fun HotelPereMariaNavHost(
-        navController: NavHostController,
-        modifier: Modifier,
-        navigateTo: (String) -> Unit,
+    navController: NavHostController,
+    modifier: Modifier,
+    navigateTo: (String) -> Unit,
 ) {
     NavHost(
-            navController = navController,
-            startDestination = Screen.RoomFinder.route,
-            modifier = modifier
+        navController = navController,
+        startDestination = Screen.RoomFinder.route,
+        modifier = modifier
     ) {
-        composable(route = Screen.RoomFinder.route) { RoomFinderView() }
+        composable(route = Screen.RoomFinder.route) {
+            RoomFinderScreen(navigateToCreateBooking = { roomId ->
+                navigateTo(
+                    Screen.RoomDetails.createRoute(roomId)
+                )
+            })
+        }
 
-        composable(route = Screen.RoomCatalog.route) { RoomCatalogView() }
+        composable(route = Screen.RoomCatalog.route) {
+            RoomCatalogScreen(navigateToRoomDetails = { roomId ->
+                navigateTo(
+                    Screen.RoomDetails.createRoute(roomId)
+                )
 
-        composable(route = Screen.UserAccount.route) { UserAccountView() }
+            })
+        }
+
+        composable(route = Screen.UserAccount.route) { UserAccountScreen() }
+
+        composable(route = Screen.RoomDetails.route){
+            RoomDetailsScreen()
+        }
     }
 }

@@ -1,4 +1,6 @@
 package com.trycatchers.hotel.data.repositories
 
-class RoomRepository {
+import javax.inject.Inject
+
+class RoomRepository @Inject constructor() {
 }
