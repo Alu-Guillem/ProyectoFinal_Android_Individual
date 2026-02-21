@@ -2,6 +2,7 @@ package com.trycatchers.hotel.di
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.trycatchers.hotel.data.api.AuthService
 import com.trycatchers.hotel.data.api.BookingService
 import com.trycatchers.hotel.data.api.RoomService
 import com.trycatchers.hotel.data.api.UserService
@@ -10,6 +11,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -22,11 +24,24 @@ object ApiModule {
     @Provides
     fun provideMoshi(): Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
+
     @Singleton
     @Provides
-    fun provideRetrofit(moshi: Moshi): Retrofit =
+    fun provideOkHttpClient(authHeader: AuthHeader): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(authHeader)
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideRetrofit(
+        moshi: Moshi,
+        okHttpClient: OkHttpClient
+    ): Retrofit =
             Retrofit.Builder()
                     .baseUrl(ApiConfig.BASE_URL)
+                    .client(okHttpClient)
                     .addConverterFactory(MoshiConverterFactory.create(moshi))
                     .build()
 
@@ -44,4 +59,9 @@ object ApiModule {
     @Provides
     fun provideRoomService(retrofit: Retrofit): RoomService =
             retrofit.create(RoomService::class.java)
+
+    @Singleton
+    @Provides
+    fun provideAuthService(retrofit: Retrofit): AuthService =
+        retrofit.create(AuthService::class.java)
 }
