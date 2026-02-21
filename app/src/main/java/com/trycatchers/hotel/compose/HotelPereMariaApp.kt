@@ -13,6 +13,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.trycatchers.hotel.compose.components.navigation.BottomBar
 import com.trycatchers.hotel.compose.components.navigation.TopBar
+import com.trycatchers.hotel.compose.screens.LoginScreen
+import com.trycatchers.hotel.compose.screens.RegisterScreen
 import com.trycatchers.hotel.compose.screens.RoomCatalogScreen
 import com.trycatchers.hotel.compose.screens.RoomDetailsScreen
 import com.trycatchers.hotel.compose.screens.RoomFinderScreen
@@ -31,11 +33,12 @@ fun HotelPereMariaApp(onThemeToggle: () -> Unit) {
             restoreState = true
         }
     }
+    val showBottomBar = currentRoute !in listOf(Screen.Login.route, Screen.Register.route)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopBar(navigateTo = navigateTo, onThemeToggle = onThemeToggle) },
-        bottomBar = { BottomBar(navigateTo = navigateTo, currentRoute = currentRoute) }
+        bottomBar = { if (showBottomBar) BottomBar(navigateTo = navigateTo, currentRoute = currentRoute) }
     ) { innerPadding ->
         HotelPereMariaNavHost(
             navController = navController,
@@ -53,9 +56,32 @@ fun HotelPereMariaNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.RoomFinder.route,
+        startDestination = Screen.Login.route,
         modifier = modifier
     ) {
+
+        composable(route = Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.RoomFinder.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onRegisterClick = { navigateTo(Screen.Register.route) }
+
+            )
+        }
+
+        composable(route = Screen.Register.route) {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate(Screen.RoomFinder.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(route = Screen.RoomFinder.route) {
             RoomFinderScreen(navigateToCreateBooking = { roomId ->
                 navigateTo(
@@ -73,7 +99,13 @@ fun HotelPereMariaNavHost(
             })
         }
 
-        composable(route = Screen.UserAccount.route) { UserAccountScreen() }
+        composable(route = Screen.UserAccount.route) { UserAccountScreen(
+            onLogout = {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        ) }
 
         composable(route = Screen.RoomDetails.route){
             RoomDetailsScreen()
