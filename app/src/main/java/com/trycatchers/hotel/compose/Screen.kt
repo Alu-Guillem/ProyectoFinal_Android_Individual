@@ -94,6 +94,9 @@ sealed class Screen(
                 BookingSummary,
                 BookingPayment,
                 BookingDetail,
+                Login,
+                UserProfile,
+                Register,
             )
 
         fun fromRoute(route: String?): Screen? = all.firstOrNull { it.matches(route) }

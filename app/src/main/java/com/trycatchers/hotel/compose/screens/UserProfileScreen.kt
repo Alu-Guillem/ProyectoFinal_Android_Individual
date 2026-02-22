@@ -118,7 +118,7 @@ fun UserProfileView(
             ModernTextField(
                 label = "Nombre",
                 value = user.firstName,
-                onValueChange = onLastNameChange,
+                onValueChange = onNameChange,
             )
         }
 
