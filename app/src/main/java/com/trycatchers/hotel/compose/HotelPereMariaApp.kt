@@ -18,36 +18,63 @@ import com.trycatchers.hotel.compose.screens.RegisterScreen
 import com.trycatchers.hotel.compose.screens.RoomCatalogScreen
 import com.trycatchers.hotel.compose.screens.RoomDetailsScreen
 import com.trycatchers.hotel.compose.screens.RoomFinderScreen
-import com.trycatchers.hotel.compose.screens.UserAccountScreen
+import com.trycatchers.hotel.compose.screens.UserProfileScreen
 
+/**
+ * Composable raíz de la aplicación.
+ *
+ * Configura el scaffold principal con TopBar y BottomBar condicionales, y delega la navegación a
+ * [HotelPereMariaNavHost].
+ */
 @Composable
 fun HotelPereMariaApp(onThemeToggle: () -> Unit) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+
     val currentRoute: String = navBackStackEntry?.destination?.route ?: ""
 
-    val navigateTo: (String) -> Unit = { route ->
-        navController.navigate(route) {
-            popUpTo(navController.graph.startDestinationId) { saveState = true }
+    val currentScreen = Screen.fromRoute(currentRoute)
+    val showTopBar = currentScreen?.showTopBar ?: true
+    val showBottomBar = currentScreen?.showBottomBar ?: true
+
+    fun navigateTo(screen: Screen, route: String? = null, popToRoot: Boolean = false) {
+        val destination = route ?: screen.route
+        navController.navigate(destination) {
+            if (popToRoot) {
+                popUpTo(Screen.InitialSearch.route) { inclusive = false }
+            }
             launchSingleTop = true
-            restoreState = true
         }
     }
-    val showBottomBar = currentRoute !in listOf(Screen.Login.route, Screen.Register.route)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopBar(navigateTo = navigateTo, onThemeToggle = onThemeToggle) },
-        bottomBar = { if (showBottomBar) BottomBar(navigateTo = navigateTo, currentRoute = currentRoute) }
+        topBar = {
+            if (showTopBar) {
+                TopBar(
+                    navigateTo = { screen, route ->
+                        navigateTo(screen, route, popToRoot = false)
+                    },
+                    onThemeToggle = onThemeToggle
+                )
+            }
+        },
+        bottomBar = {
+            if (showBottomBar) {
+                BottomBar(
+                    navigateTo = { screen -> navigateTo(screen, popToRoot = true) },
+                    currentRoute = currentRoute
+                )
+            }
+        }
     ) { innerPadding ->
         HotelPereMariaNavHost(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
-            navigateTo = navigateTo
+            navigateTo = ::navigateTo
         )
     }
 }
-
 @Composable
 fun HotelPereMariaNavHost(
     navController: NavHostController,
@@ -99,13 +126,17 @@ fun HotelPereMariaNavHost(
             })
         }
 
-        composable(route = Screen.UserAccount.route) { UserAccountScreen(
-            onLogout = {
-                navController.navigate(Screen.Login.route) {
-                    popUpTo(0) { inclusive = true }
+
+
+        composable(route = Screen.UserProfile.route) {
+            UserProfileScreen(
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
-            }
-        ) }
+            )
+        }
 
         composable(route = Screen.RoomDetails.route){
             RoomDetailsScreen()
