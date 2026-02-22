@@ -15,8 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
-class UserAccountViewModel @Inject constructor(
+class UserProfileViewModel  @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {

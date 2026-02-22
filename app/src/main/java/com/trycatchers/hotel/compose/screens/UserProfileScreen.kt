@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -24,12 +23,11 @@ import coil.compose.rememberAsyncImagePainter
 import com.trycatchers.hotel.data.dtos.UserDto
 import com.trycatchers.hotel.ui.theme.AppTypography
 import com.trycatchers.hotel.utils.ApiConfig
-import com.trycatchers.hotel.viewmodels.RegisterViewModel
-import com.trycatchers.hotel.viewmodels.UserAccountViewModel
+import com.trycatchers.hotel.viewmodels.UserProfileViewModel
 
 @Composable
-fun UserAccountScreen(
-    viewModel: UserAccountViewModel = hiltViewModel(),
+fun UserProfileScreen(
+    viewModel: UserProfileViewModel = hiltViewModel(),
     onLogout: () -> Unit = {}
 
 ) {
@@ -46,7 +44,7 @@ fun UserAccountScreen(
             "$base/$path"
         }
 
-        UserAccountView(
+        UserProfileView(
             user = user,
             photoUrl = fullPhotoUrl,
             onNameChange = { viewModel.updateFirstName(it) },
@@ -66,7 +64,7 @@ fun UserAccountScreen(
 
 }
 @Composable
-fun UserAccountView(
+fun UserProfileView(
     user: UserDto,
     photoUrl: String?,
     onNameChange: (String) -> Unit = {},
