@@ -1,5 +1,10 @@
 package com.trycatchers.hotel.compose.screens
 
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,6 +50,7 @@ fun BookingDetailScreen(
     viewModel: BookingDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showCancelDialog by rememberSaveable { mutableStateOf(false) }
@@ -56,6 +63,46 @@ fun BookingDetailScreen(
                 is BookingDetailEvent.NavigateToPayment -> {
                     val bookingId = state.booking?.bookingId ?: return@collect
                     onNavigateToPayment(bookingId)
+                }
+
+                is BookingDetailEvent.OpenInvoice -> {
+                    Log.d("INVOICE_DEBUG", "Evento OpenInvoice recibido. uri=${event.uri}")
+                    val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(event.uri, "application/pdf")
+                        clipData = ClipData.newUri(context.contentResolver, "Factura", event.uri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    val resolvers = context.packageManager
+                        .queryIntentActivities(viewIntent, PackageManager.MATCH_DEFAULT_ONLY)
+                    Log.d("INVOICE_DEBUG", "Apps candidatas para PDF: ${resolvers.size}")
+                    resolvers.forEach { resolveInfo ->
+                        val packageName = resolveInfo.activityInfo.packageName
+                        Log.d("INVOICE_DEBUG", "Concediendo permiso de lectura a: $packageName")
+                        context.grantUriPermission(
+                            packageName,
+                            event.uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        )
+                    }
+                    val chooser = Intent.createChooser(viewIntent, "Abrir factura").apply {
+                        clipData = ClipData.newUri(context.contentResolver, "Factura", event.uri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    try {
+                        Log.d("INVOICE_DEBUG", "Lanzando selector/visor PDF")
+                        context.startActivity(chooser)
+                        Log.d("INVOICE_DEBUG", "startActivity ejecutado correctamente")
+                    } catch (error: ActivityNotFoundException) {
+                        Log.e("INVOICE_DEBUG", "No hay app para abrir PDF", error)
+                        scope.launch {
+                            snackbarHostState.showSnackbar("No hay ninguna app para abrir PDF")
+                        }
+                    } catch (error: Exception) {
+                        Log.e("INVOICE_DEBUG", "Error al abrir el visor PDF", error)
+                        scope.launch {
+                            snackbarHostState.showSnackbar("No se pudo abrir el visor PDF")
+                        }
+                    }
                 }
 
                 is BookingDetailEvent.BookingCanceled -> {
@@ -206,6 +253,7 @@ fun BookingDetailScreen(
                     onCancel = { showCancelDialog = true },
                     onExtend = viewModel::openExtendDialog,
                     onPay = viewModel::navigateToPayment,
+                    onOpenInvoice = { viewModel.openInvoice(context) },
                     onOpenReview = viewModel::openReviewDialog,
                     onDeleteReview = viewModel::deleteReview,
                     modifier = Modifier.padding(innerPadding),
@@ -221,6 +269,7 @@ private fun BookingDetailContent(
     onCancel: () -> Unit,
     onExtend: () -> Unit,
     onPay: () -> Unit,
+    onOpenInvoice: () -> Unit,
     onOpenReview: () -> Unit,
     onDeleteReview: () -> Unit,
     modifier: Modifier = Modifier,
@@ -324,6 +373,21 @@ private fun BookingDetailContent(
                     emphasize = true,
                 )
             }
+        }
+
+        OutlinedButton(
+            onClick = onOpenInvoice,
+            enabled = !state.isLoadingInvoice,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            if (state.isLoadingInvoice) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text("Ver factura")
         }
 
         // Actions

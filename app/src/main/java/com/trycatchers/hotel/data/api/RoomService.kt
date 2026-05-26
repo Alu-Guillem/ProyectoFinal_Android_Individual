@@ -5,10 +5,10 @@ import retrofit2.http.*
 
 interface RoomService {
 
-    @GET("rooms")
+    @GET("rooms?maintenace=false&closed=false&occuped=false")
     suspend fun getAllRooms(): List<RoomDto>
 
-    @GET("rooms")
+    @GET("rooms?maintenace=false&closed=false&occuped=false")
     suspend fun searchAvailableRooms(@QueryMap filters: Map<String, String>): List<RoomDto>
 
     @GET("rooms/{id}")

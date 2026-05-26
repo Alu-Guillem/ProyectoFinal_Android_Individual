@@ -2,6 +2,7 @@ package com.trycatchers.hotel.data.dtos
 
 import com.squareup.moshi.Json
 import com.trycatchers.hotel.data.models.Room
+import com.trycatchers.hotel.utils.ApiConfig
 
 data class RoomDto(
     @Json(name = "_id") val id: String? = null,
@@ -10,6 +11,7 @@ data class RoomDto(
     @Json(name = "number") val number: Int = 0,
     @Json(name = "description") val description: String? = null,
     @Json(name = "mainImage") val mainImage: String? = null,
+    @Json(name = "image") val image: String? = null,
     @Json(name = "extraImages") val extraImages: List<String>? = null,
     @Json(name = "pricePerNight") val pricePerNight: Double = 0.0,
     @Json(name = "rate") val rate: Double? = null,
@@ -28,8 +30,8 @@ data class RoomDto(
             number = number,
             type = type,
             description = description,
-            mainImage = mainImage,
-            extraImages = extraImages ?: emptyList(),
+            mainImage = normalizeImageUrl(mainImage ?: image),
+            extraImages = extraImages.orEmpty().mapNotNull(::normalizeImageUrl),
             pricePerNight = pricePerNight,
             rate = rate,
             occupancyLimit = occupancyLimit,
@@ -42,3 +44,21 @@ data class RoomDto(
 }
 
 fun List<RoomDto>.toDomain(): List<Room> = map { it.toDomain() }
+
+private fun normalizeImageUrl(rawUrl: String?): String? {
+    val normalizedPath = rawUrl
+        ?.trim()
+        ?.replace("\\", "/")
+        ?.takeIf { it.isNotBlank() }
+        ?: return null
+
+    if (normalizedPath.startsWith("http://") || normalizedPath.startsWith("https://")) {
+        return normalizedPath
+    }
+
+    val base = ApiConfig.BASE_DOMAIN.removeSuffix("/")
+    val path = normalizedPath
+        .removePrefix("/")
+        .replace("src/rooms/uploads/", "uploads/")
+    return "$base/$path"
+}

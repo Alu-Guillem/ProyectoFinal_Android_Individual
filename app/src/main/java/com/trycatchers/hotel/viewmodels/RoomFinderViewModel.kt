@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.trycatchers.hotel.data.dtos.RoomSearchFilters
 import com.trycatchers.hotel.data.models.Room
 import com.trycatchers.hotel.data.repositories.RoomRepository
-import com.trycatchers.hotel.data.repositories.SessionRepository
 import com.trycatchers.hotel.utils.formatApiDate
 import com.trycatchers.hotel.utils.millisToLocalDate
 import com.trycatchers.hotel.utils.toUserMessage
@@ -65,7 +64,6 @@ private data class RoomSearchParams(
 class RoomFinderViewModel
 @Inject
 constructor(
-    private val sessionRepository: SessionRepository,
     private val roomRepository: RoomRepository,
 ) : ViewModel() {
 
@@ -456,9 +454,4 @@ constructor(
         _canSearch.value = areDatesValid(start, end)
     }
 
-    init {
-        sessionRepository.saveSession(
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTc3ODM3YjBiZTMyOTdlZmFiNTM1MTAiLCJyb2xlIjoiY3VzdG9tZXIiLCJpYXQiOjE3NzA3NTExMzgsImV4cCI6MTc3MjA0NzEzOH0.GgSiRq-INeSMzUMxqH7nTC8AUZe1czAqan5keN2qXZo"
-        )
-    }
 }

@@ -1,5 +1,7 @@
 package com.trycatchers.hotel.data.models
 
+import java.util.Date
+
 /**
  * Representa una habitación disponible en el catálogo. Mantiene nombres coherentes con la API de
  * backend para evitar desajustes entre plataformas.
@@ -19,5 +21,7 @@ data class Room(
     val hasCradle: Boolean = false,
     val hasExtraBed: Boolean = false,
     val offerPercentage: Double? = null,
-    val extras: List<String> = emptyList()
+    val extras: List<String> = emptyList(),
+
+
 )

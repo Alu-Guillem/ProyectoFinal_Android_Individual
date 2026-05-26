@@ -1,8 +1,13 @@
 package com.trycatchers.hotel.viewmodels
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import androidx.core.content.FileProvider
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trycatchers.hotel.BuildConfig
 import com.trycatchers.hotel.data.models.Booking
 import com.trycatchers.hotel.data.models.Review
 import com.trycatchers.hotel.data.models.Room
@@ -14,8 +19,13 @@ import com.trycatchers.hotel.utils.formatDisplayDate
 import com.trycatchers.hotel.utils.parseApiDate
 import com.trycatchers.hotel.utils.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import java.io.File
+import java.util.UUID
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.*
@@ -28,6 +38,7 @@ data class BookingDetailUiState(
     val isCanceling: Boolean = false,
     val isExtending: Boolean = false,
     val isPaying: Boolean = false,
+    val isLoadingInvoice: Boolean = false,
     val booking: Booking? = null,
     val room: Room? = null,
     val review: Review? = null,
@@ -94,6 +105,7 @@ data class BookingDetailUiState(
 /** Eventos de navegación emitidos por [BookingDetailViewModel]. */
 sealed interface BookingDetailEvent {
     data object NavigateToPayment : BookingDetailEvent
+    data class OpenInvoice(val uri: Uri) : BookingDetailEvent
     data class BookingCanceled(val wasPaid: Boolean, val refundAmount: String) : BookingDetailEvent
     data object ExtendPaymentCanceled : BookingDetailEvent
     data object ExtendPaymentCompleted : BookingDetailEvent
@@ -336,6 +348,51 @@ constructor(
         viewModelScope.launch { _events.emit(BookingDetailEvent.NavigateToPayment) }
     }
 
+    /** Descarga la factura PDF y solicita abrirla con un visor compatible. */
+    fun openInvoice(context: Context) {
+        if (_uiState.value.isLoadingInvoice) return
+        val invoiceBookingId = _uiState.value.booking?.bookingId ?: bookingId
+        Log.d("INVOICE_DEBUG", "Boton factura pulsado. bookingId=$invoiceBookingId")
+        if (invoiceBookingId.isBlank()) {
+            Log.e("INVOICE_DEBUG", "No hay bookingId para pedir la factura")
+            _uiState.update { it.copy(errorMessage = "No se encontro el identificador de la reserva") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingInvoice = true, errorMessage = null) }
+            try {
+                Log.d("INVOICE_DEBUG", "Solicitando PDF a la API: /bookings/$invoiceBookingId/invoice")
+                val invoiceFile = withContext(Dispatchers.IO) {
+                    val invoiceBody = bookingRepository.getInvoice(invoiceBookingId)
+                    Log.d("INVOICE_DEBUG", "Respuesta PDF recibida. contentLength=${invoiceBody.contentLength()} contentType=${invoiceBody.contentType()}")
+                    saveInvoiceToCache(context, invoiceBookingId, invoiceBody)
+                }
+                Log.d("INVOICE_DEBUG", "PDF guardado en cache: ${invoiceFile.absolutePath} size=${invoiceFile.length()} exists=${invoiceFile.exists()}")
+                if (!invoiceFile.exists() || invoiceFile.length() == 0L) {
+                    Log.e("INVOICE_DEBUG", "El PDF existe=${invoiceFile.exists()} size=${invoiceFile.length()}")
+                    throw IllegalStateException("La factura descargada esta vacia")
+                }
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${BuildConfig.APPLICATION_ID}.fileprovider",
+                    invoiceFile,
+                )
+                Log.d("INVOICE_DEBUG", "Uri generada para compartir PDF: $uri")
+                _uiState.update { it.copy(isLoadingInvoice = false) }
+                _events.emit(BookingDetailEvent.OpenInvoice(uri))
+            } catch (error: Exception) {
+                Log.e("INVOICE_DEBUG", "Error descargando/preparando factura", error)
+                _uiState.update {
+                    it.copy(
+                        isLoadingInvoice = false,
+                        errorMessage = error.toUserMessage("No se pudo descargar la factura"),
+                    )
+                }
+            }
+        }
+    }
+
     // ── Review ──────────────────────────────────────────────────────────────
 
     /** Abre el diálogo de reseña (crear o editar). */
@@ -432,4 +489,19 @@ constructor(
             }
         }
     }
+}
+
+private fun saveInvoiceToCache(context: Context, bookingId: String, body: ResponseBody): File {
+    val invoicesDir = File(context.cacheDir, "invoices").apply { mkdirs() }
+    val safeBookingId = bookingId.ifBlank { "reserva" }.replace(Regex("[^A-Za-z0-9_-]"), "_")
+    val invoiceFile = File(invoicesDir, "factura-$safeBookingId-${UUID.randomUUID()}.pdf")
+
+    body.byteStream().use { input ->
+        invoiceFile.outputStream().use { output ->
+            input.copyTo(output)
+            output.flush()
+        }
+    }
+
+    return invoiceFile
 }

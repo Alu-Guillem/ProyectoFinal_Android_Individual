@@ -17,8 +17,8 @@ data class RoomSearchFilters(
 ) {
 
     fun toQueryMap(): Map<String, String> = buildMap {
-        put("startDate", startDate)
-        put("endDate", endDate)
+        //put("startDate", startDate)
+        //put("endDate", endDate)
         put("occupants", occupants.toString())
 
         if (onlyOffers) put("onlyOffers", "true")

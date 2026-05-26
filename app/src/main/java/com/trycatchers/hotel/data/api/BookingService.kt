@@ -2,6 +2,8 @@ package com.trycatchers.hotel.data.api
 
 import com.trycatchers.hotel.data.dtos.BookingDto
 import com.trycatchers.hotel.data.dtos.CreateBookingRequest
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.*
 
 /**
@@ -24,6 +26,10 @@ interface BookingService {
 
     @GET("bookings/{id}")
     suspend fun getBookingById(@Path("id") id: String): BookingDto
+
+    @Streaming
+    @GET("bookings/{id}/invoice")
+    suspend fun getInvoice(@Path("id") id: String): Response<ResponseBody>
 
     @POST("bookings")
     suspend fun createBooking(@Body booking: CreateBookingRequest): BookingDto

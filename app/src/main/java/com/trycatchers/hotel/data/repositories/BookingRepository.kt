@@ -5,6 +5,8 @@ import com.trycatchers.hotel.data.dtos.BookingDto
 import com.trycatchers.hotel.data.dtos.CreateBookingRequest
 import com.trycatchers.hotel.data.dtos.toDomain
 import com.trycatchers.hotel.data.models.Booking
+import okhttp3.ResponseBody
+import retrofit2.HttpException
 import javax.inject.Inject
 
 /**
@@ -28,6 +30,14 @@ class BookingRepository @Inject constructor(private val bookingService: BookingS
      * @return Datos de la reserva
      */
     suspend fun getById(id: String): Booking = bookingService.getBookingById(id).toDomain()
+
+    suspend fun getInvoice(id: String): ResponseBody {
+        val response = bookingService.getInvoice(id)
+        if (response.isSuccessful) {
+            return response.body() ?: throw IllegalStateException("La factura esta vacia")
+        }
+        throw HttpException(response)
+    }
 
     /**
      * Crea una nueva reserva.
