@@ -19,13 +19,21 @@ constructor(
         val originalRequest = chain.request()
         val token = sessionRepository.getToken()
 
+        android.util.Log.d("INTERCEPTOR_DEBUG", "URL: ${originalRequest.url} | Tiene Token: ${!token.isNullOrBlank()}")
+
         val requestWithAuth =
             if (!token.isNullOrBlank()) {
-                originalRequest.newBuilder().addHeader("Authorization", "Bearer $token").build()
+                originalRequest.newBuilder()
+                    .removeHeader("Authorization")
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
             } else {
                 originalRequest
             }
 
         return chain.proceed(requestWithAuth)
     }
+
+
+
 }
