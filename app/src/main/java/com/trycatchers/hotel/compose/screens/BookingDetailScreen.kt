@@ -57,6 +57,8 @@ fun BookingDetailScreen(
     var showExtendPaymentCanceledDialog by rememberSaveable { mutableStateOf(false) }
     var showExtendSuccessDialog by rememberSaveable { mutableStateOf(false) }
 
+
+
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -390,6 +392,7 @@ private fun BookingDetailContent(
             Text("Ver factura")
         }
 
+
         // Actions
         if (!state.isCanceled) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -698,4 +701,6 @@ private fun ReviewDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
     )
+
+
 }

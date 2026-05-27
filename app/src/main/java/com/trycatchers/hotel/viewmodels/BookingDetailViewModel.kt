@@ -352,9 +352,7 @@ constructor(
     fun openInvoice(context: Context) {
         if (_uiState.value.isLoadingInvoice) return
         val invoiceBookingId = _uiState.value.booking?.bookingId ?: bookingId
-        Log.d("INVOICE_DEBUG", "Boton factura pulsado. bookingId=$invoiceBookingId")
         if (invoiceBookingId.isBlank()) {
-            Log.e("INVOICE_DEBUG", "No hay bookingId para pedir la factura")
             _uiState.update { it.copy(errorMessage = "No se encontro el identificador de la reserva") }
             return
         }
@@ -362,15 +360,11 @@ constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingInvoice = true, errorMessage = null) }
             try {
-                Log.d("INVOICE_DEBUG", "Solicitando PDF a la API: /bookings/$invoiceBookingId/invoice")
                 val invoiceFile = withContext(Dispatchers.IO) {
                     val invoiceBody = bookingRepository.getInvoice(invoiceBookingId)
-                    Log.d("INVOICE_DEBUG", "Respuesta PDF recibida. contentLength=${invoiceBody.contentLength()} contentType=${invoiceBody.contentType()}")
                     saveInvoiceToCache(context, invoiceBookingId, invoiceBody)
                 }
-                Log.d("INVOICE_DEBUG", "PDF guardado en cache: ${invoiceFile.absolutePath} size=${invoiceFile.length()} exists=${invoiceFile.exists()}")
                 if (!invoiceFile.exists() || invoiceFile.length() == 0L) {
-                    Log.e("INVOICE_DEBUG", "El PDF existe=${invoiceFile.exists()} size=${invoiceFile.length()}")
                     throw IllegalStateException("La factura descargada esta vacia")
                 }
                 val uri = FileProvider.getUriForFile(
@@ -378,11 +372,9 @@ constructor(
                     "${BuildConfig.APPLICATION_ID}.fileprovider",
                     invoiceFile,
                 )
-                Log.d("INVOICE_DEBUG", "Uri generada para compartir PDF: $uri")
                 _uiState.update { it.copy(isLoadingInvoice = false) }
                 _events.emit(BookingDetailEvent.OpenInvoice(uri))
             } catch (error: Exception) {
-                Log.e("INVOICE_DEBUG", "Error descargando/preparando factura", error)
                 _uiState.update {
                     it.copy(
                         isLoadingInvoice = false,

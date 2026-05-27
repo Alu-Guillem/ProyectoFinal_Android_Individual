@@ -69,11 +69,28 @@ class RoomCatalogViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
                 val rooms = roomRepository.getAll()
+
+                val stats =
+                    roomRepository.getStats()
+
+                val popularRoomId =
+                    stats.maxByOrNull {
+                        it.totalBookings
+                    }?.roomId
+
+                val roomsWithStats =
+                    rooms.map { room ->
+                        room.copy(
+                            isPopular =
+                                room.id == popularRoomId
+                        )
+                    }
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         allRooms = rooms,
-                        rooms = applyFilters(rooms, it),
+                        rooms = applyFilters(roomsWithStats, it),
                     )
                 }
             } catch (e: Exception) {

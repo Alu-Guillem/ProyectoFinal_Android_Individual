@@ -97,8 +97,17 @@ sealed class Screen(
                 Login,
                 UserProfile,
                 Register,
+                BookingAudit
             )
 
         fun fromRoute(route: String?): Screen? = all.firstOrNull { it.matches(route) }
     }
+
+    data object BookingAudit :
+        Screen(
+            route = "booking-audit",
+            showTopBar = false,
+            showBottomBar = false
+        )
+
 }

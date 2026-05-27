@@ -7,6 +7,8 @@ import com.trycatchers.hotel.data.dtos.toDomain
 import com.trycatchers.hotel.data.models.Booking
 import okhttp3.ResponseBody
 import retrofit2.HttpException
+import com.trycatchers.hotel.data.dtos.toDomain
+import com.trycatchers.hotel.data.models.BookingAudit
 import javax.inject.Inject
 
 /**
@@ -92,6 +94,11 @@ class BookingRepository @Inject constructor(private val bookingService: BookingS
      * @param id ID de la reserva a eliminar
      */
     suspend fun delete(id: String) = bookingService.deleteBooking(id)
+
+
+    suspend fun getAudit(actorId: String) =
+        bookingService.getBookingAudit(actorId).toDomain()
+
 }
 
 /** Extensión para convertir modelo de dominio a DTO. */

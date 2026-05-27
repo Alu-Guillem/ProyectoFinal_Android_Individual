@@ -23,5 +23,6 @@ data class Room(
     val offerPercentage: Double? = null,
     val extras: List<String> = emptyList(),
 
+    val isPopular: Boolean = false
 
 )

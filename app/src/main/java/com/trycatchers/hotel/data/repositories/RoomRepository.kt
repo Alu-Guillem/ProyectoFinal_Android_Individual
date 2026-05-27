@@ -6,11 +6,16 @@ import com.trycatchers.hotel.data.dtos.RoomSearchFilters
 import com.trycatchers.hotel.data.dtos.toDomain
 import com.trycatchers.hotel.data.models.Room
 import javax.inject.Inject
+import com.trycatchers.hotel.data.models.RoomStats
 
 class RoomRepository @Inject constructor(private val roomService: RoomService) {
 
     suspend fun getAll(): List<Room> {
         return roomService.getAllRooms().toDomain()
+    }
+
+    suspend fun getStats(): List<RoomStats> {
+        return roomService.getRoomStats().toDomain()
     }
 
     suspend fun searchAvailable(filters: RoomSearchFilters): List<Room> {

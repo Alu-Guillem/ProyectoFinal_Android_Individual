@@ -140,6 +140,7 @@ private fun RoomCardBadges(room: Room) {
         }
         if (room.hasCradle) add("Cuna")
         if (room.hasExtraBed) add("Cama extra")
+        if (room.isPopular) add("Más popular")
     }
 
     if (badges.isEmpty()) return
@@ -170,7 +171,7 @@ fun RoomCardPreview() {
         id = "1",
         name = "Suite Deluxe",
         type = "Suite",
-        description = "Una habitación espaciosa con vistas al mar, cama king size y baño privado.",
+        description = "Una habitación espaciosa con vistas al mar",
         pricePerNight = 250.0,
         occupancyLimit = 2,
         mainImage = null,

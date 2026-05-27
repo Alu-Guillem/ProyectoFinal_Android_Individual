@@ -1,5 +1,6 @@
 package com.trycatchers.hotel.data.api
 
+import com.trycatchers.hotel.data.dtos.BookingAuditDto
 import com.trycatchers.hotel.data.dtos.BookingDto
 import com.trycatchers.hotel.data.dtos.CreateBookingRequest
 import okhttp3.ResponseBody
@@ -51,4 +52,10 @@ interface BookingService {
 
     @DELETE("bookings/{id}")
     suspend fun deleteBooking(@Path("id") id: String)
+
+    @GET("bookings/audit/{id}")
+    suspend fun getBookingAudit(
+        @Path("id") actorId: String
+    ): List<BookingAuditDto>
+
 }

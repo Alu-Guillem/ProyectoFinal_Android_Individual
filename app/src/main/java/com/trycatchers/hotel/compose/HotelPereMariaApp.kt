@@ -195,7 +195,12 @@ fun HotelPereMariaNavHost(
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.UserProfile.route)
-                }
+                },
+                onNavigateToAudit = {
+                    navController.navigate(
+                        Screen.BookingAudit.route
+                    )
+                },
             )
         }
 
@@ -256,11 +261,27 @@ fun HotelPereMariaNavHost(
 
         composable(route = Screen.BookingDetail.route) {
             BookingDetailScreen(
-                onNavigateBack = { navigateToUserAccountFromBookingFlow() },
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
                 onNavigateToPayment = { bookingId ->
-                    navController.navigate(Screen.BookingPayment.createRoute(bookingId))
+                    navController.navigate(
+                        Screen.BookingPayment.createRoute(bookingId)
+                    )
+                },
+            )
+        }
+
+        composable(
+            route = Screen.BookingAudit.route
+        ) {
+            BookingAuditScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
+
+
     }
 }

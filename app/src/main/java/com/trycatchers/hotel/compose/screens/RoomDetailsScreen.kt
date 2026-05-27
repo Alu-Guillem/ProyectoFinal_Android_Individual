@@ -347,11 +347,12 @@ private fun BookingBottomBar(room: Room, onBook: () -> Unit) {
             Column {
                 val price = room.pricePerNight
                 val offer = room.offerPercentage
-
+                var showPrice = price
                 if (offer != null && offer > 0) {
-                    val original = price / (1 - offer / 100)
+                    val discCalc = price * (1 - offer / 100)
+                    showPrice = discCalc
                     Text(
-                        text = "%.2f €".format(original),
+                        text = "%.2f €".format(price),
                         style =
                             MaterialTheme.typography.bodySmall.copy(
                                 textDecoration =
@@ -364,7 +365,7 @@ private fun BookingBottomBar(room: Room, onBook: () -> Unit) {
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "%.2f €".format(price),
+                        text = "%.2f €".format(showPrice),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

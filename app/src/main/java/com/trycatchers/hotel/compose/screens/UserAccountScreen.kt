@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.Person
@@ -43,6 +44,8 @@ fun UserAccountScreen(
     onNavigateToBookingDetail: (String) -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     viewModel: UserAccountViewModel = hiltViewModel(),
+    onNavigateToAudit: () -> Unit,
+
 ) {
     val state by viewModel.uiState.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
@@ -77,6 +80,14 @@ fun UserAccountScreen(
                     fontWeight = FontWeight.Bold,
                 )
                 Row {
+                    IconButton(
+                        onClick = onNavigateToAudit
+                    ) {
+                        Icon(
+                            Icons.Filled.CalendarToday,
+                            contentDescription = "Auditoría"
+                        )
+                    }
                     IconButton(onClick = onNavigateToProfile) {
                         Icon(Icons.Filled.Person, contentDescription = "Mi perfil")
                     }

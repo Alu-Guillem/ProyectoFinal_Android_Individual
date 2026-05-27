@@ -1,6 +1,7 @@
 package com.trycatchers.hotel.data.api
 
 import com.trycatchers.hotel.data.dtos.RoomDto
+import com.trycatchers.hotel.data.dtos.RoomStatsDto
 import retrofit2.http.*
 
 interface RoomService {
@@ -13,6 +14,9 @@ interface RoomService {
 
     @GET("rooms/{id}")
     suspend fun getRoomById(@Path("id") id: String): RoomDto
+
+    @GET("rooms/stats")
+    suspend fun getRoomStats(): List<RoomStatsDto>
 
     @POST("rooms")
     suspend fun createRoom(@Body room: RoomDto): RoomDto
